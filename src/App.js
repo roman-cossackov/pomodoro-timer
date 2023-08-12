@@ -1,25 +1,25 @@
-import logo from './logo.svg';
+import React, {useState} from 'react';
+
 import './App.css';
 
+import Timer from './components/timer-components/Timer'
+import Settings from './components/settings-components/Settings.js'
+
+
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+    const [showSettings, setShowSettings] = useState(false)
+
+    const turnOnSettingsHandler = () => {
+      setShowSettings(true)
+    }
+
+    return (
+        <main>
+            {showSettings ? <Settings /> : <Timer onTurnOnSettings={turnOnSettingsHandler}/>}
+        </main>
+    );
 }
 
 export default App;
