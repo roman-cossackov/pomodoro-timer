@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
 import 'react-circular-progressbar/dist/styles.css'
@@ -8,13 +8,23 @@ import PauseButton from './PauseButton.js'
 import SettingsButton from './SettingsButton.js'
 
 const red = "#f54e4e"
-const green = "4aec8c"
+// const green = "4aec8c"
 
 const Timer = (props) => {
+    const [isPaused, setIsPaused] = useState(true)
+
+    const playHandler = () => {
+        setIsPaused(false)
+    }
+
+    const pauseHandler = () => {
+        setIsPaused(true)
+    }
+
     const percentage = 66;
 
     const turnOnSettingsHandler = () => {
-        props.turnOnSettings()
+        props.onTurnOnSettings()
     }
 
     return (<div>
@@ -28,8 +38,7 @@ const Timer = (props) => {
                     })} 
                 />
                 <div style={{marginTop:'30px'}}>
-                    <PlayButton />
-                    <PauseButton />
+                    {isPaused ? <PlayButton onPlay={playHandler}/> : <PauseButton onPause={pauseHandler}/>}
                 </div>
                 <div>
                     <SettingsButton onTurnOnSettings={turnOnSettingsHandler}/>

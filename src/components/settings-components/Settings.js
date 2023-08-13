@@ -1,11 +1,41 @@
-import React from 'react';
+import React, {useContext} from 'react';
+import ReactSlider from 'react-slider'
 
-const Settings = () => {
+import '../../css/slider.css'
+import SettingsContext from './SettingsContext.js'
+import BackButton from './BackButton.js'
+
+const Settings = (props) => {
+    const settingsInfo = useContext(SettingsContext)
+
+  
+
     return (
-        <div>
-            <div>settings</div>
-            <button>OK</button>
-        </div>
+            <div style={{textAlign: 'left'}}>
+                <label>work minutes: {settingsInfo.workMinutes}:00</label>
+                <ReactSlider
+                    className={'slider'}
+                    thumbClassName={'thumb'}
+                    trackClassName={'track'}
+                    value={settingsInfo.workMinutes}
+                    onChange={newValue => settingsInfo.setWorkMinutes(newValue)}
+                    min={1}
+                    max={120}
+                />
+                <label>break minutes: {settingsInfo.breakMinutes}:00</label>
+                <ReactSlider
+                    className={'slider green'}
+                    thumbClassName={'thumb'}
+                    trackClassName={'track'}
+                    value={settingsInfo.breakMinutes}
+                    onChange={newValue => settingsInfo.setBreakMinutes(newValue)}
+                    min={1}
+                    max={120}
+                />
+                <div style={{textAlign: 'center', marginTop:'20px'}}>
+                    <BackButton onClick={() => props.onTurnOffSettings()} />
+                </div>
+            </div>
     )
 }
 
