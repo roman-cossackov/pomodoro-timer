@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
 import 'react-circular-progressbar/dist/styles.css'
@@ -6,20 +6,46 @@ import 'react-circular-progressbar/dist/styles.css'
 import PlayButton from './PlayButton.js'
 import PauseButton from './PauseButton.js'
 import SettingsButton from './SettingsButton.js'
+import SettingsContext from '../settings-components/SettingsContext.js'
 
 const red = "#f54e4e"
 // const green = "4aec8c"
 
 const Timer = (props) => {
+    const settingsInfo = useContext(SettingsContext)
+
     const [isPaused, setIsPaused] = useState(true)
+    const [mode, setMode] = useState('work')
+    const [secondsLeft, setSecondsLeft] = useState(0)
 
-    const playHandler = () => {
-        setIsPaused(false)
+    const switchMode = () => {
+        const nextMode = mode === 'work' ? 'break' : "work";
+        const nextSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
+        setMode(nextMode);
+        setSecondsLeft(nextSeconds)
     }
 
-    const pauseHandler = () => {
-        setIsPaused(true)
+    const tick = () => {
+        setSecondsLeft(secondsLeft - 1)
     }
+
+    const initTimer = () => {
+        setSecondsLeft(settingsInfo.workMinutes * 60)
+    }
+
+    useEffect(() => {
+        initTimer();
+
+        setInterval(() => {
+            if (isPaused) {
+                return;
+            }
+            
+            if (secondsLeft === 0) {
+                return switchMode()
+            }
+        }, 1000)
+    }, [settingsInfo]);
 
     const percentage = 66;
 
@@ -38,7 +64,7 @@ const Timer = (props) => {
                     })} 
                 />
                 <div style={{marginTop:'30px'}}>
-                    {isPaused ? <PlayButton onPlay={playHandler}/> : <PauseButton onPause={pauseHandler}/>}
+                    {isPaused ? <PlayButton/> : <PauseButton/>}
                 </div>
                 <div>
                     <SettingsButton onTurnOnSettings={turnOnSettingsHandler}/>
