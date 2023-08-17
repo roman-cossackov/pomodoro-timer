@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useContext, useRef} from 'react';
 
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
 import 'react-circular-progressbar/dist/styles.css'
@@ -9,7 +9,7 @@ import SettingsButton from './SettingsButton.js'
 import SettingsContext from '../settings-components/SettingsContext.js'
 
 const red = "#f54e4e"
-// const green = "4aec8c"
+const green = "4aec8c"
 
 const Timer = (props) => {
     const settingsInfo = useContext(SettingsContext)
@@ -18,53 +18,78 @@ const Timer = (props) => {
     const [mode, setMode] = useState('work')
     const [secondsLeft, setSecondsLeft] = useState(0)
 
-    const switchMode = () => {
-        const nextMode = mode === 'work' ? 'break' : "work";
-        const nextSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
-        setMode(nextMode);
-        setSecondsLeft(nextSeconds)
-    }
+    const secondsLeftRef = useRef(secondsLeft);
+    const isPausedRef = useRef(isPaused);
+    const modeRef = useRef(mode);
 
     const tick = () => {
-        setSecondsLeft(secondsLeft - 1)
-    }
-
-    const initTimer = () => {
-        setSecondsLeft(settingsInfo.workMinutes * 60)
+        secondsLeftRef.current--;
+        setSecondsLeft(secondsLeftRef.current);
     }
 
     useEffect(() => {
-        initTimer();
 
-        setInterval(() => {
-            if (isPaused) {
+        const switchMode = () => {
+            const nextMode = modeRef.current === 'work' ? 'break' : 'work';
+            const nextSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
+    
+            setMode(nextMode);
+            modeRef.current = nextMode;
+    
+            setSecondsLeft(nextSeconds)
+            secondsLeftRef.current = nextSeconds
+        }
+
+        secondsLeftRef.current = settingsInfo.workMinutes * 60
+        setSecondsLeft(secondsLeftRef.current)
+
+        const interval = setInterval(() => {
+            if (isPausedRef.current) {
                 return;
             }
             
-            if (secondsLeft === 0) {
+            if (secondsLeftRef.current === 0) {
                 return switchMode()
             }
-        }, 1000)
-    }, [settingsInfo]);
 
-    const percentage = 66;
+            tick()
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [settingsInfo]);
 
     const turnOnSettingsHandler = () => {
         props.onTurnOnSettings()
     }
 
+    const startTimerHandler = () => {
+        setIsPaused(false); isPausedRef.current = false;
+    };
+
+    const stopTimerHandler = () => {
+        setIsPaused(true); isPausedRef.current = true;
+    };
+
+    const totalSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
+    const percentage = Math.round(secondsLeft / totalSeconds) * 100
+    const minutes = Math.floor(secondsLeft / 60);
+    let seconds = secondsLeft % 60;
+    if (seconds < 10) seconds = `0${seconds}`
+
     return (<div>
                 <CircularProgressbar
                     value={percentage}
-                    text={`${percentage}%`}
+                    text={`${minutes}:${seconds}`}
                     styles={buildStyles({
-                        textColor: '#fff',
-                        pathColor: red,
+                        textColor: '#fff', 
+                        pathColor: mode === 'work' ? red : green,
                         trailColor:'rgba(255,255,255,.2)',
                     })} 
                 />
                 <div style={{marginTop:'30px'}}>
-                    {isPaused ? <PlayButton/> : <PauseButton/>}
+                    {isPaused ?
+                        <PlayButton onStartTimer={startTimerHandler}/> :
+                        <PauseButton onStopTimer={stopTimerHandler}/>}
                 </div>
                 <div>
                     <SettingsButton onTurnOnSettings={turnOnSettingsHandler}/>
