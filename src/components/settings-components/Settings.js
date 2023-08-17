@@ -8,8 +8,6 @@ import BackButton from './BackButton.js'
 const Settings = (props) => {
     const settingsInfo = useContext(SettingsContext)
 
-  
-
     return (
             <div style={{textAlign: 'left'}}>
                 <label>work minutes: {settingsInfo.workMinutes}:00</label>
