@@ -9,13 +9,13 @@ import SettingsButton from './SettingsButton.js'
 import SettingsContext from '../settings-components/SettingsContext.js'
 
 const red = "#f54e4e"
-const green = "4aec8c"
+const green = "#4aec8c"
 
 const Timer = (props) => {
     const settingsInfo = useContext(SettingsContext)
 
     const [isPaused, setIsPaused] = useState(true)
-    const [mode, setMode] = useState('work')
+    const [mode, setMode] = useState('break')
     const [secondsLeft, setSecondsLeft] = useState(0)
 
     const secondsLeftRef = useRef(secondsLeft);
@@ -40,7 +40,7 @@ const Timer = (props) => {
             secondsLeftRef.current = nextSeconds
         }
 
-        secondsLeftRef.current = settingsInfo.workMinutes * 60
+        secondsLeftRef.current = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
         setSecondsLeft(secondsLeftRef.current)
 
         const interval = setInterval(() => {
@@ -53,10 +53,10 @@ const Timer = (props) => {
             }
 
             tick()
-        }, 1000)
+        }, 1)
 
         return () => clearInterval(interval)
-    }, [settingsInfo]);
+    }, [settingsInfo, mode]);
 
     const turnOnSettingsHandler = () => {
         props.onTurnOnSettings()
@@ -71,7 +71,7 @@ const Timer = (props) => {
     };
 
     const totalSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
-    const percentage = Math.round(secondsLeft / totalSeconds) * 100
+    const percentage = Math.round(secondsLeft / totalSeconds * 100) 
     const minutes = Math.floor(secondsLeft / 60);
     let seconds = secondsLeft % 60;
     if (seconds < 10) seconds = `0${seconds}`
