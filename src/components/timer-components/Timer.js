@@ -1,101 +1,125 @@
-import React, {useState, useEffect, useContext, useRef} from 'react';
+import React, { useState, useEffect, useContext, useRef } from "react";
 
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
-import 'react-circular-progressbar/dist/styles.css'
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
-import PlayButton from './PlayButton.js'
-import PauseButton from './PauseButton.js'
-import SettingsButton from './SettingsButton.js'
-import SettingsContext from '../settings-components/SettingsContext.js'
+import PlayButton from "./PlayButton.js";
+import PauseButton from "./PauseButton.js";
+import SettingsButton from "./SettingsButton.js";
+import SettingsContext from "../settings-components/SettingsContext.js";
+import sound1 from "../../assets/beep1.mp3"
+import sound2 from "../../assets/beep2.wav"
 
-const red = "#f54e4e"
-const green = "#4aec8c"
+const red = "#f54e4e";
+const green = "#4aec8c";
 
 const Timer = (props) => {
-    const settingsInfo = useContext(SettingsContext)
+  const settingsInfo = useContext(SettingsContext);
 
-    const [isPaused, setIsPaused] = useState(true)
-    const [mode, setMode] = useState('break')
-    const [secondsLeft, setSecondsLeft] = useState(0)
+  const [isPaused, setIsPaused] = useState(true);
+  const [mode, setMode] = useState("work");
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
-    const secondsLeftRef = useRef(secondsLeft);
-    const isPausedRef = useRef(isPaused);
-    const modeRef = useRef(mode);
+  const secondsLeftRef = useRef(secondsLeft);
+  const isPausedRef = useRef(isPaused);
+  const modeRef = useRef(mode);
 
-    const tick = () => {
-        secondsLeftRef.current--;
-        setSecondsLeft(secondsLeftRef.current);
-    }
+  const tick = () => {
+    secondsLeftRef.current--;
+    setSecondsLeft(secondsLeftRef.current);
 
-    useEffect(() => {
+    if (secondsLeftRef.current <= 10 && secondsLeftRef.current > 0) playBeep1()
+  };
 
-        const switchMode = () => {
-            const nextMode = modeRef.current === 'work' ? 'break' : 'work';
-            const nextSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
-    
-            setMode(nextMode);
-            modeRef.current = nextMode;
-    
-            setSecondsLeft(nextSeconds)
-            secondsLeftRef.current = nextSeconds
-        }
+  const playBeep1 = () => {
+    new Audio(sound1).play()
+  }
 
-        secondsLeftRef.current = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
-        setSecondsLeft(secondsLeftRef.current)
+  const playBeep2 = () => {
+    new Audio(sound2).play()
+  }
 
-        const interval = setInterval(() => {
-            if (isPausedRef.current) {
-                return;
-            }
-            
-            if (secondsLeftRef.current === 0) {
-                return switchMode()
-            }
+  useEffect(() => {
+    const switchMode = () => {
+      playBeep2()  
+      const nextMode = modeRef.current === "work" ? "break" : "work";
+      const nextSeconds =
+        (mode === "work"
+          ? settingsInfo.workMinutes
+          : settingsInfo.breakMinutes) * 60;
 
-            tick()
-        }, 1)
+      setMode(nextMode);
+      modeRef.current = nextMode;
 
-        return () => clearInterval(interval)
-    }, [settingsInfo, mode]);
-
-    const turnOnSettingsHandler = () => {
-        props.onTurnOnSettings()
-    }
-
-    const startTimerHandler = () => {
-        setIsPaused(false); isPausedRef.current = false;
+      setSecondsLeft(nextSeconds);
+      secondsLeftRef.current = nextSeconds;
     };
 
-    const stopTimerHandler = () => {
-        setIsPaused(true); isPausedRef.current = true;
-    };
+    secondsLeftRef.current =
+      (mode === "work" ? settingsInfo.workMinutes : settingsInfo.breakMinutes) *
+      60;
+    setSecondsLeft(secondsLeftRef.current);
 
-    const totalSeconds = (mode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60
-    const percentage = Math.round(secondsLeft / totalSeconds * 100) 
-    const minutes = Math.floor(secondsLeft / 60);
-    let seconds = secondsLeft % 60;
-    if (seconds < 10) seconds = `0${seconds}`
+    const interval = setInterval(() => {
+      if (isPausedRef.current) {
+        return;
+      }
 
-    return (<div>
-                <CircularProgressbar
-                    value={percentage}
-                    text={`${minutes}:${seconds}`}
-                    styles={buildStyles({
-                        textColor: '#fff', 
-                        pathColor: mode === 'work' ? red : green,
-                        trailColor:'rgba(255,255,255,.2)',
-                    })} 
-                />
-                <div style={{marginTop:'30px'}}>
-                    {isPaused ?
-                        <PlayButton onStartTimer={startTimerHandler}/> :
-                        <PauseButton onStopTimer={stopTimerHandler}/>}
-                </div>
-                <div>
-                    <SettingsButton onTurnOnSettings={turnOnSettingsHandler}/>
-                </div>
-            </div>
-    )
-}
+      if (secondsLeftRef.current === 0) {
+        return switchMode();
+      }
 
-export default Timer
+      tick();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [settingsInfo, mode]);
+
+  const turnOnSettingsHandler = () => {
+    props.onTurnOnSettings();
+  };
+
+  const startTimerHandler = () => {
+    setIsPaused(false);
+    isPausedRef.current = false;
+  };
+
+  const stopTimerHandler = () => {
+    setIsPaused(true);
+    isPausedRef.current = true;
+  };
+
+  const totalSeconds =
+    (mode === "work" ? settingsInfo.workMinutes : settingsInfo.breakMinutes) *
+    60;
+  const percentage = Math.round((secondsLeft / totalSeconds) * 100);
+  const minutes = Math.floor(secondsLeft / 60);
+  let seconds = secondsLeft % 60;
+  if (seconds < 10) seconds = `0${seconds}`;
+
+  return (
+    <div>
+      <CircularProgressbar
+        value={percentage}
+        text={`${minutes}:${seconds}`}
+        styles={buildStyles({
+          textColor: "#fff",
+          pathColor: mode === "work" ? red : green,
+          trailColor: "rgba(255,255,255,.2)",
+        })}
+      />
+      <div style={{ marginTop: "30px" }}>
+        {isPaused ? (
+          <PlayButton onStartTimer={startTimerHandler} />
+        ) : (
+          <PauseButton onStopTimer={stopTimerHandler} />
+        )}
+      </div>
+      <div>
+        <SettingsButton onTurnOnSettings={turnOnSettingsHandler} />
+      </div>
+    </div>
+  );
+};
+
+export default Timer;
