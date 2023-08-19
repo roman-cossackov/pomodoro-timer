@@ -3,11 +3,6 @@
   --green: #4aec8c;
 }
 
-body {
-  background-color: #47597E;
-  color: #eee;
-}
-
 main {
   padding-top: 50px;
   max-width: 340px;
@@ -26,7 +21,6 @@ button {
 
 button.with-text {
   width: auto;
-  background-color: rgba(255,255,255,0.1);
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 1.4rem;

@@ -7,6 +7,7 @@ import PlayButton from "./PlayButton.js";
 import PauseButton from "./PauseButton.js";
 import SettingsButton from "./SettingsButton.js";
 import SettingsContext from "../settings-components/SettingsContext.js";
+import ThemeContext from "../toggler/ThemeContext.js";
 import sound1 from "../../assets/beep1.mp3"
 import sound2 from "../../assets/beep2.wav"
 
@@ -15,6 +16,7 @@ const green = "#4aec8c";
 
 const Timer = (props) => {
   const settingsInfo = useContext(SettingsContext);
+  const theme = useContext(ThemeContext)
 
   const [isPaused, setIsPaused] = useState(true);
   const [mode, setMode] = useState("work");
@@ -103,7 +105,7 @@ const Timer = (props) => {
         value={percentage}
         text={`${minutes}:${seconds}`}
         styles={buildStyles({
-          textColor: "#fff",
+          textColor: theme.darkMode === true ? "#fff" : "#000",
           pathColor: mode === "work" ? red : green,
           trailColor: "rgba(255,255,255,.2)",
         })}
